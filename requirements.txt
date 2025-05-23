@@ -1,3 +1,7 @@
+# Use git version of openai-whisper that works with Python 3.13
+openai-whisper @ git+https://github.com/openai/whisper.git
+
+# Keep your exact working versions for everything else
 altair==5.5.0
 annotated-types==0.7.0
 anyio==4.9.0
@@ -41,7 +45,6 @@ narwhals==1.40.0
 networkx==3.4.2
 numba==0.61.2
 numpy==2.2.6
-openai-whisper==20240930
 packaging==24.2
 pandas==2.2.3
 pillow==11.2.1
