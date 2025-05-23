@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+openai-whisper
+speechbrain
+moviepy
+requests
+python-multipart
+streamlit
