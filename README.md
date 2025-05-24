@@ -2,6 +2,16 @@
 
 An AI-powered application that detects English accents from video URLs using AI models. The app analyzes speech in videos to identify the language being spoken and classify different English accents with confidence scores.
 
+
+## 🎬 Demo Video
+
+**Watch the app in action!** 
+
+[![Demo Video](https://img.shields.io/badge/🎥_Watch_Demo-Google_Drive-blue?style=for-the-badge)](https://drive.google.com/file/d/1n6836Z5zWEICZcGJ_2VzowaOzjviUz0O/view?usp=sharing)
+
+See how the app processes videos and identifies different English accents with confidence scores.
+
+
 ## 🌟 Features
 
 - **Language Detection**: Automatically detects the language being spoken using OpenAI Whisper
