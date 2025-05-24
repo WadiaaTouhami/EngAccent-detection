@@ -1,42 +1,44 @@
-import streamlit as st
 import os
 import sys
 
 # Add the app directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "app"))
 
-# Global variables to store the pipeline loading result
-pipeline = None
-pipeline_available = False
-pipeline_error = None
 
-try:
-    from app.pipeline import AccentDetectionPipeline
+def main():
+    # Import streamlit ONLY inside main() - this is crucial!
+    import streamlit as st
 
+    # This MUST be the very first Streamlit command
+    st.set_page_config(page_title="Accent Detection Demo", page_icon="🎙️", layout="wide")
+
+    # Now we can safely define cached functions and load the pipeline
     @st.cache_resource
     def load_pipeline():
         """Load the pipeline once and cache it"""
+        from app.pipeline import AccentDetectionPipeline
+
         return AccentDetectionPipeline()
 
-    # Initialize pipeline
-    pipeline = load_pipeline()
-    pipeline_available = True
-
-except Exception as e:
-    # Store the error but don't display it yet - wait for main()
-    pipeline_error = str(e)
+    # Initialize variables
     pipeline = None
     pipeline_available = False
+    pipeline_error = None
 
+    # Try to load the pipeline
+    try:
+        pipeline = load_pipeline()
+        pipeline_available = True
+    except Exception as e:
+        pipeline_error = str(e)
+        pipeline = None
+        pipeline_available = False
 
-def main():
-    # This MUST be the first Streamlit command
-    st.set_page_config(page_title="Accent Detection Demo", page_icon="🎙️", layout="wide")
-
+    # Now build the UI
     st.title("🎙️ Accent Detection Demo")
     st.markdown("**Upload a video URL to detect English accents using AI**")
 
-    # Now handle the pipeline loading status
+    # Show pipeline status
     if pipeline_available:
         st.success("🟢 AI models loaded successfully!")
     else:
@@ -117,7 +119,7 @@ def main():
                 with st.spinner("🔄 Processing video... This may take a few minutes."):
                     try:
                         result = pipeline.process(video_url)
-                        display_results(result)
+                        display_results(result, st)
                     except Exception as e:
                         st.error(f"❌ Processing failed: {str(e)}")
                         st.error("This might be due to memory or resource limitations.")
@@ -138,10 +140,10 @@ def main():
                         "accent_confidence_percentage": 82.0,
                         "summary": "Demo result - AI models not loaded on Streamlit Cloud",
                     }
-                    display_results(demo_result)
+                    display_results(demo_result, st)
 
 
-def display_results(result):
+def display_results(result, st):
     """Display processing results"""
     if result.get("status") in ["success", "demo"]:
         if result.get("status") == "demo":
