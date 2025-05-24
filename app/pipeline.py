@@ -15,7 +15,7 @@ from pathlib import Path
 
 class AccentDetectionPipeline:
     def __init__(
-        self, whisper_model_size: str = "base"
+        self, whisper_model_size: str = "tiny"
     ):  # Changed from "tiny" to "base"
         """Initialize and load models once"""
         # Whisper for language detection
