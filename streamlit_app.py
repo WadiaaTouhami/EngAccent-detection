@@ -5,6 +5,11 @@ import sys
 # Add the app directory to the Python path
 sys.path.append(os.path.join(os.path.dirname(__file__), "app"))
 
+# Global variables to store the pipeline loading result
+pipeline = None
+pipeline_available = False
+pipeline_error = None
+
 try:
     from app.pipeline import AccentDetectionPipeline
 
@@ -18,24 +23,26 @@ try:
     pipeline_available = True
 
 except Exception as e:
-    st.error(f"Failed to load AI models: {str(e)}")
-    st.error("This might be due to memory limitations on Streamlit Cloud.")
-    st.info("Please try running this app locally for full functionality.")
+    # Store the error but don't display it yet - wait for main()
+    pipeline_error = str(e)
     pipeline = None
     pipeline_available = False
 
 
 def main():
+    # This MUST be the first Streamlit command
     st.set_page_config(page_title="Accent Detection Demo", page_icon="🎙️", layout="wide")
 
     st.title("🎙️ Accent Detection Demo")
     st.markdown("**Upload a video URL to detect English accents using AI**")
 
-    # Show status
+    # Now handle the pipeline loading status
     if pipeline_available:
         st.success("🟢 AI models loaded successfully!")
     else:
-        st.warning("⚠️ AI models not available - running in demo mode")
+        st.error(f"Failed to load AI models: {pipeline_error}")
+        st.error("This might be due to memory limitations on Streamlit Cloud.")
+        st.info("Please try running this app locally for full functionality.")
 
     # Sidebar with info
     with st.sidebar:
@@ -75,7 +82,7 @@ def main():
             "https://rr1---sn-25ge7nz6.googlevideo.com/videoplayback?expire=1748104701&ei=naExaNjEEqaJvdIP1JfKuAs&ip=2a01:e0a:2bf:24a0:2215:deff:fe87:a84c&id=o-ANfNELlaSQVwY3GSsGJBiTy9Bs5ZkkuZM8lV5trLJBgd&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ==&rms=au,au&gcr=fr&bui=AecWEAa2RX93ap-5GS6kaxejUu746R0IwMBj8zW9IBcELYMC4xSiQUMlX26ekBgEG-B1fvork-3XAvNh&vprv=1&svpuc=1&mime=video/mp4&ns=_hiL9sldH7KGrif_R5HckxgQ&rqh=1&gir=yes&clen=2862944&ratebypass=yes&dur=38.656&lmt=1748007128017237&lmw=1&c=TVHTML5&sefc=1&txp=5430534&n=p8kYtLOYt97SmA&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,gcr,bui,vprv,svpuc,mime,ns,rqh,gir,clen,ratebypass,dur,lmt&sig=AJfQdSswRQIhAMDad8pkcvG5zC9p_Rxbn_IQgRMzSV986sbWEeU6nvQQAiADozOV0HfDXxd13RGOHF-xIjSPaxyNHpGJAMKOwxqm-w==&from_cache=True&title=Australian%20MP%20ends%20final%20day%20speech%20with%20a%20%27shoey%27%20|%20ITV%20News&redirect_counter=1&rm=sn-25grk7e&rrc=104&fexp=24350590,24350737,24350827,24350961,24351173,24351177,24351495,24351528,24351594,24351638,24351658,24351662,24351759,24351789,24351864,24351907,24352011,24352018,24352019,24352021&req_id=cde353b8b922a3ee&cms_redirect=yes&cmsv=e&ipbypass=yes&met=1748083159,&mh=Jy&mip=78.122.101.79&mm=31&mn=sn-25ge7nz6&ms=au&mt=1748082796&mv=m&mvi=1&pl=22&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=ACuhMU0wRQIgMf7CrMQQnDg-13ONHt0fCBVfCmrlr6VW8WnG0EjbzdECIQDJFUSL1vV-0KBPvubTi7spzAkD46PsIfpBIk_BaMT5iw%3D%3D",
             "https://rr1---sn-25ge7nzs.googlevideo.com/videoplayback?expire=1748105229&ei=raMxaLS5NLaIvdIPnp_1-Ao&ip=176.165.28.99&id=o-ALN_86rmK0j-x-WQfXWJEkNZ0vOsMq0nG_GlJlI-lfJ7&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ==&bui=AecWEAbl02pwi_52YxaGdv1OEugQooqJbniQVrb30uZzZKl7cNx5cSmVmy2CPijfQ7Um2jVA35bP2azv&vprv=1&svpuc=1&mime=video/mp4&ns=LQcfmM8W15INFOnNpGC8RtgQ&rqh=1&gir=yes&clen=2041990&ratebypass=yes&dur=27.477&lmt=1747315492792182&lmw=1&c=TVHTML5&sefc=1&txp=5430534&n=KveOTRec6HqH2w&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,bui,vprv,svpuc,mime,ns,rqh,gir,clen,ratebypass,dur,lmt&sig=AJfQdSswRAIgHUGPsc4PHkI0RNFNowP10glJfxtRukHHWPOijUvB5BwCIGUgtVMMfo_P7iw3F2DVv7QN4O-tfY1x_m8c7LLoK32a&from_cache=True&title=Trump%20says%20US-Iran%20%27very%20close%27%20to%20nuclear%20deal&rm=sn-cv0tb0xn-jqbr7e,sn-25gkr7e&rrc=79,104,80&fexp=24350590,24350737,24350827,24350961,24351173,24351177,24351495,24351528,24351594,24351638,24351658,24351661,24351662,24351759,24351789,24351864,24351907,24352015,24352018,24352019&req_id=5e4b7d9b23d1a3ee&ipbypass=yes&redirect_counter=3&cm2rm=sn-n4g-jqber7l&cms_redirect=yes&cmsv=e&met=1748083763,&mh=FO&mip=78.122.101.79&mm=30&mn=sn-25ge7nzs&ms=nxu&mt=1748083474&mv=m&mvi=1&pl=22&rms=nxu,au&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=ACuhMU0wRQIgVsU1iNL9hq4kIxh9VpUxEMW9HcPyzzibXAHYfy8M3J8CIQDdS4dE0zSIXRTdj9-Wjjuqvcvo30CmRWy-28mo-4Tf7Q%3D%3D",
             "https://rr2---sn-25ge7nzr.googlevideo.com/videoplayback?expire=1748106887&ei=J6oxaNG8Ie74xN8PpdTJyQQ&ip=37.65.50.6&id=o-AOkqlFjNzgLMod5kMPZDpw6qcPckk9-Jhft9YUQHHX1p&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ==&bui=AecWEAb-vm9NFa092YZgQxQIpM5QIJXf7AbtdaVouKUN9a5sxHch9njk-fFDh-Zp4KQ0IM9DAydMRVLo&vprv=1&svpuc=1&mime=video/mp4&ns=G6ASvYFYaesLSI_6G_L4Rc0Q&rqh=1&gir=yes&clen=4009337&ratebypass=yes&dur=53.717&lmt=1747883482056817&lmw=1&fexp=24350590,24350737,24350827,24350961,24351173,24351177,24351495,24351528,24351594,24351598,24351638,24351658,24351661,24351662,24351759,24351789,24351864,24351907,24352018,24352020,51466643&c=TVHTML5&sefc=1&txp=5430534&n=wJGabqOzkvZ-dQ&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,bui,vprv,svpuc,mime,ns,rqh,gir,clen,ratebypass,dur,lmt&sig=AJfQdSswRAIgRLxSiPlgZR05Ctyat46P0LgcBlmdWXGTcQ_AYaUAzGUCIDlaJSmz4CmM_OeWgTe1idRDy1OGU2xCU5wNM22pQotG&from_cache=True&title=South%20Africa%20President%20Calls%20Meeting%20With%20Trump%20%27A%20Great%20Success%27&rm=sn-n4g-nmcd7s,sn-25gr67l&rrc=79,80,104&req_id=8fd8f8f15fbaa3ee&cm2rm=sn-n4g-jqber7s&rms=nxu,au&redirect_counter=3&cms_redirect=yes&cmsv=e&ipbypass=yes&met=1748085327,&mh=3X&mip=78.122.101.79&mm=30&mn=sn-25ge7nzr&ms=nxu&mt=1748084915&mv=m&mvi=2&pl=22&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=ACuhMU0wRQIhANIIyBrYcMSa1VFHJBon7zw31nv3TQXsE-5xGU2za8pdAiBvogLNEZ6iFblT57Rw44uL9w7vKN_qP3xhIcL4LNnYFw%3D%3D",
-            "https://rr5---sn-n4g-jqbe6.googlevideo.com/videoplayback?expire=1748107276&ei=rKsxaNfrK-rZxN8Pmva_8AU&ip=86.235.220.209&id=o-APkAmHdsNoOwBLTV_iFytf8ij0LUDNFfKtGKRnu5gb2A&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ==&rms=au,au&bui=AecWEAZT3YCN0lmczoVE8CUYeifCN1KvzUlUrYJvUWirICTkKdNdV79ygcwf4VAs5O5cjkibthClPqM5&vprv=1&svpuc=1&mime=video/mp4&ns=rJy1p0ZRZh5falRvzaYAGSsQ&rqh=1&gir=yes&clen=3694190&ratebypass=yes&dur=49.408&lmt=1747517926224429&lmw=1&fexp=24350590,24350737,24350827,24350961,24351064,24351173,24351177,24351495,24351528,24351594,24351638,24351658,24351661,24351759,24351790,24351864,24351907,24352018,24352020,24352099,51466642&c=TVHTML5&sefc=1&txp=5430534&n=HNlOyJkfGFixyw&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,bui,vprv,svpuc,mime,ns,rqh,gir,clen,ratebypass,dur,lmt&sig=AJfQdSswRQIgOu-apT2tmlQKLi2lAtls5N1Lm3YDeVS9TZtjWLG_cHoCIQCAGgcS29pXz8rPBC4zUpDE-YozQGYgTKkrlCxO3n5fIA==&from_cache=True&title=French%20President%20Macron%20calls%20Israeli%20PM%27s%20Gaza%20measures%20a%20%22disgrace%22%20|%20DW%20News&redirect_counter=1&rm=sn-25grl76&rrc=104&req_id=688ac9535ddfa3ee&cms_redirect=yes&cmsv=e&ipbypass=yes&met=1748085725,&mh=cg&mip=78.122.101.79&mm=31&mn=sn-n4g-jqbe6&ms=au&mt=1748085443&mv=m&mvi=5&pl=22&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=ACuhMU0wRQIgOlGmqMzv9wLArH2wjpdM13-mpX1_JdDfh4xVdwi1fiICIQDtb7henUIxR5toWUuAA4Raqlw6nAo1reyi5W3znTKUbw%3D%3D"
+            "https://rr5---sn-n4g-jqbe6.googlevideo.com/videoplayback?expire=1748107276&ei=rKsxaNfrK-rZxN8Pmva_8AU&ip=86.235.220.209&id=o-APkAmHdsNoOwBLTV_iFytf8ij0LUDNFfKtGKRnu5gb2A&itag=18&source=youtube&requiressl=yes&xpc=EgVo2aDSNQ==&rms=au,au&bui=AecWEAZT3YCN0lmczoVE8CUYeifCN1KvzUlUrYJvUWirICTkKdNdV79ygcwf4VAs5O5cjkibthClPqM5&vprv=1&svpuc=1&mime=video/mp4&ns=rJy1p0ZRZh5falRvzaYAGSsQ&rqh=1&gir=yes&clen=3694190&ratebypass=yes&dur=49.408&lmt=1747517926224429&lmw=1&fexp=24350590,24350737,24350827,24350961,24351064,24351173,24351177,24351495,24351528,24351594,24351638,24351658,24351661,24351759,24351790,24351864,24351907,24352018,24352020,24352099,51466642&c=TVHTML5&sefc=1&txp=5430534&n=HNlOyJkfGFixyw&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,bui,vprv,svpuc,mime,ns,rqh,gir,clen,ratebypass,dur,lmt&sig=AJfQdSswRQIgOu-apT2tmlQKLi2lAtls5N1Lm3YDeVS9TZtjWLG_cHoCIQCAGgcS29pXz8rPBC4zUpDE-YozQGYgTKkrlCxO3n5fIA==&from_cache=True&title=French%20President%20Macron%20calls%20Israeli%20PM%27s%20Gaza%20measures%20a%20%22disgrace%22%20|%20DW%20News&redirect_counter=1&rm=sn-25grl76&rrc=104&req_id=688ac9535ddfa3ee&cms_redirect=yes&cmsv=e&ipbypass=yes&met=1748085725,&mh=cg&mip=78.122.101.79&mm=31&mn=sn-n4g-jqbe6&ms=au&mt=1748085443&mv=m&mvi=5&pl=22&lsparams=ipbypass,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=ACuhMU0wRQIgOlGmqMzv9wLArH2wjpdM13-mpX1_JdDfh4xVdwi1fiICIQDtb7henUIxR5toWUuAA4Raqlw6nAo1reyi5W3znTKUbw%3D%3D",
         ]
 
         for i, url in enumerate(example_urls):
